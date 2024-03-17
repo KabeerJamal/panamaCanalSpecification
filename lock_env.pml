@@ -249,6 +249,14 @@ proctype main_control() {
 	:: request_west?true ->
 		if
 		:: doors_status.west == closed ->
+            //Explaination of first if statment: if the door is east_low and the ship wants to go from east to west(into the lock)
+            //we decrease the water level
+            if
+            :: LOCK_ORIENTATION == east_low -> change_valve_pos!high_side;
+            :: LOCK_ORIENTATION == west_low -> change_valve_pos!low_side;
+			fi;
+
+
 			change_doors_pos!west_side; doors_pos_changed?true;
 		:: doors_status.west == open -> skip;
 		fi;
@@ -256,6 +264,12 @@ proctype main_control() {
 	:: request_east?true ->
 		if
 		:: doors_status.east == closed ->
+
+            if
+            :: LOCK_ORIENTATION == west_low -> change_valve_pos!high_side;
+            :: LOCK_ORIENTATION == east_low -> change_valve_pos!low_side;
+			fi;
+
 			change_doors_pos!east_side; doors_pos_changed?true;
 		:: doors_status.east == open -> skip;
 		fi;
