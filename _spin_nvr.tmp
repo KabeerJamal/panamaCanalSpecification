@@ -1,0 +1,7 @@
+never msg_one {    /* !(<> ((last_m==1))) */
+accept_init:
+T0_init:
+	do
+	:: (! (((last_m==1)))) -> goto T0_init
+	od;
+}
