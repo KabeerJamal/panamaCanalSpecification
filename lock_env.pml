@@ -17,25 +17,13 @@
 
 // LTL formulas to be verified
 // Formula p1 holds if the first ship can always eventually enter the lock when going from west to east.
-//ltl p1 { []<> (ship_status[0] == go_west_to_east_in_lock) }
-//ltl a { [](!(doors_status.east == open && doors_status.west == open))}
-//ltl b1a { []((LOCK_ORIENTATION == west_low && doors_status.west == open) -> valve_status.higher == closed)}
-//ltl b1b { []((LOCK_ORIENTATION == east_low && doors_status.east == open) -> valve_status.higher == closed)}
-//ltl b2a { []((LOCK_ORIENTATION == west_low && doors_status.east == open) -> valve_status.lower == closed)}
-//ltl b2b { []((LOCK_ORIENTATION == east_low && doors_status.west == open) -> valve_status.lower == closed)}
-//ltl c1a { []((LOCK_ORIENTATION == west_low && doors_status.west == open) -> lock_water_level == low_level)}
-//ltl c1b { []((LOCK_ORIENTATION == east_low && doors_status.east == open) -> lock_water_level == low_level)}
-//ltl c2a { []((LOCK_ORIENTATION == west_low && doors_status.east == open) -> lock_water_level == high_level)}
-//ltl c2b { []((LOCK_ORIENTATION == east_low && doors_status.west == open) -> lock_water_level == high_level)}
-//ltl d1 { []((request_west && ship_status[0] == go_west_to_east) -> <> (ship_status[0] == go_west_to_east_in_lock)) }
-//ltl d1 { []((request_east && ship_status[0] == go_east_to_west) -> <> (ship_status[0] == go_east_to_west_in_lock)) }
-//ltl p1 { []<> (ship_status[0] == go_west_to_east_in_lock) }
-//ltl c1a { []((LOCK_ORIENTATION == west_low && doors_status.west == open) -> lock_water_level == low_level)}
-//ltl c1b { []((LOCK_ORIENTATION == east_low && doors_status.east == open) -> lock_water_level == low_level)}
-//ltl c2a { []((LOCK_ORIENTATION == west_low && doors_status.east == open) -> lock_water_level == high_level)}
-//ltl c2b { []((LOCK_ORIENTATION == east_low && doors_status.west == open) -> lock_water_level == high_level)}
-//ltl d1a { []((request_west && ship_status[0] == go_west_to_east) -> <> (ship_status[0] == go_west_to_east_in_lock)) }
-//ltl d1b { []((request_east && ship_status[0] == go_east_to_west) -> <> (ship_status[0] == go_east_to_west_in_lock)) }
+ltl p1 { []<> (ship_status[0] == go_west_to_east_in_lock) }
+ltl c1a { []((LOCK_ORIENTATION == west_low && doors_status.west == open) -> lock_water_level == low_level)}
+ltl c1b { []((LOCK_ORIENTATION == east_low && doors_status.east == open) -> lock_water_level == low_level)}
+ltl c2a { []((LOCK_ORIENTATION == west_low && doors_status.east == open) -> lock_water_level == high_level)}
+ltl c2b { []((LOCK_ORIENTATION == east_low && doors_status.west == open) -> lock_water_level == high_level)}
+ltl d1a { []((request_west && ship_status[0] == go_west_to_east) -> <> (ship_status[0] == go_west_to_east_in_lock)) }
+ltl d1b { []((request_east && ship_status[0] == go_east_to_west) -> <> (ship_status[0] == go_east_to_west_in_lock)) }
 
 // Type for direction of ship.
 mtype:direction = { go_west_to_east, go_west_to_east_in_lock, go_east_to_west, go_east_to_west_in_lock, goal_reached };
@@ -139,6 +127,8 @@ proctype lock(byte lockid) {
 		assert((!(LOCK_ORIENTATION == east_low)) ||  (doors_status.west == closed)) // Assertion that that when lower valve is open, high door is closed
 		if
 		:: valve_status.lower == closed -> valve_status.lower = open;
+			assert((!(LOCK_ORIENTATION == west_low)) ||  (doors_status.east == closed)) // Assertion that that when lower valve is open, high door is closed
+			assert((!(LOCK_ORIENTATION == east_low)) ||  (doors_status.west == closed)) // Assertion that that when lower valve is open, high door is closed
 			lock_water_level = low_level;
 		:: valve_status.lower == open -> valve_status.lower = closed;
 		fi;
@@ -148,6 +138,8 @@ proctype lock(byte lockid) {
 		assert((!(LOCK_ORIENTATION == east_low)) ||  (doors_status.east == closed)) // Assertion that that when higher valve is open, low door is closed
 		if
 		:: valve_status.higher == closed -> valve_status.higher = open;
+			assert((!(LOCK_ORIENTATION == west_low)) ||  (doors_status.west == closed)) // Assertion that that when higher valve is open, low door is closed
+			assert((!(LOCK_ORIENTATION == east_low)) ||  (doors_status.east == closed)) // Assertion that that when higher valve is open, low door is closed
 			if
 			:: LOCK_ORIENTATION == west_low && doors_status.west == closed && valve_status.lower == closed ->
 				lock_water_level = high_level; // Water flows in as western (low) door is closed
