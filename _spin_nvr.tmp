@@ -1,7 +1,69 @@
-never msg_one {    /* !(<> ((last_m==1))) */
-accept_init:
+never p1 {    /* !([] (<> ((ship_status[0]==4)))) */
 T0_init:
 	do
-	:: (! (((last_m==1)))) -> goto T0_init
+	:: (! (((ship_status[0]==4)))) -> goto accept_S4
+	:: (1) -> goto T0_init
+	od;
+accept_S4:
+	do
+	:: (! (((ship_status[0]==4)))) -> goto accept_S4
+	od;
+}
+never c1a {    /* !([] ((! (((LOCK_ORIENTATION==2)) && ((doors_status.west==1)))) || ((lock_water_level==2)))) */
+T0_init:
+	do
+	:: atomic { (! (((! (((LOCK_ORIENTATION==2)) && ((doors_status.west==1)))) || ((lock_water_level==2))))) -> assert(!(! (((! (((LOCK_ORIENTATION==2)) && ((doors_status.west==1)))) || ((lock_water_level==2)))))) }
+	:: (1) -> goto T0_init
+	od;
+accept_all:
+	skip
+}
+never c1b {    /* !([] ((! (((LOCK_ORIENTATION==1)) && ((doors_status.east==1)))) || ((lock_water_level==2)))) */
+T0_init:
+	do
+	:: atomic { (! (((! (((LOCK_ORIENTATION==1)) && ((doors_status.east==1)))) || ((lock_water_level==2))))) -> assert(!(! (((! (((LOCK_ORIENTATION==1)) && ((doors_status.east==1)))) || ((lock_water_level==2)))))) }
+	:: (1) -> goto T0_init
+	od;
+accept_all:
+	skip
+}
+never c2a {    /* !([] ((! (((LOCK_ORIENTATION==2)) && ((doors_status.east==1)))) || ((lock_water_level==1)))) */
+T0_init:
+	do
+	:: atomic { (! (((! (((LOCK_ORIENTATION==2)) && ((doors_status.east==1)))) || ((lock_water_level==1))))) -> assert(!(! (((! (((LOCK_ORIENTATION==2)) && ((doors_status.east==1)))) || ((lock_water_level==1)))))) }
+	:: (1) -> goto T0_init
+	od;
+accept_all:
+	skip
+}
+never c2b {    /* !([] ((! (((LOCK_ORIENTATION==1)) && ((doors_status.west==1)))) || ((lock_water_level==1)))) */
+T0_init:
+	do
+	:: atomic { (! (((! (((LOCK_ORIENTATION==1)) && ((doors_status.west==1)))) || ((lock_water_level==1))))) -> assert(!(! (((! (((LOCK_ORIENTATION==1)) && ((doors_status.west==1)))) || ((lock_water_level==1)))))) }
+	:: (1) -> goto T0_init
+	od;
+accept_all:
+	skip
+}
+never d1a {    /* !([] ((! ((request_west) && ((ship_status[0]==5)))) || (<> ((ship_status[0]==4))))) */
+T0_init:
+	do
+	:: (! ((! ((request_west) && ((ship_status[0]==5))))) && ! (((ship_status[0]==4)))) -> goto accept_S4
+	:: (1) -> goto T0_init
+	od;
+accept_S4:
+	do
+	:: (! (((ship_status[0]==4)))) -> goto accept_S4
+	od;
+}
+never d1b {    /* !([] ((! ((request_east) && ((ship_status[0]==3)))) || (<> ((ship_status[0]==2))))) */
+T0_init:
+	do
+	:: (! ((! ((request_east) && ((ship_status[0]==3))))) && ! (((ship_status[0]==2)))) -> goto accept_S4
+	:: (1) -> goto T0_init
+	od;
+accept_S4:
+	do
+	:: (! (((ship_status[0]==2)))) -> goto accept_S4
 	od;
 }
