@@ -15,27 +15,25 @@
 // The maximum number of ships immediately at either side of a lock.
 #define MAX 2
 
+byte NMINUS1 = N - 1
+
 // LTL formulas to be verified
 // Formula p1 holds if the first ship can always eventually enter the lock when going from west to east.
-//ltl p1 { []<> (ship_status[0] == go_west_to_east_in_lock) }
-//ltl a { [](!(doors_status.east == open && doors_status.west == open))}
-//ltl b1a { []((LOCK_ORIENTATION == west_low && doors_status.west == open) -> valve_status.higher == closed)}
-//ltl b1b { []((LOCK_ORIENTATION == east_low && doors_status.east == open) -> valve_status.higher == closed)}
-//ltl b2a { []((LOCK_ORIENTATION == west_low && doors_status.east == open) -> valve_status.lower == closed)}
-//ltl b2b { []((LOCK_ORIENTATION == east_low && doors_status.west == open) -> valve_status.lower == closed)}
-//ltl c1a { []((LOCK_ORIENTATION == west_low && doors_status.west == open) -> lock_water_level == low_level)}
-//ltl c1b { []((LOCK_ORIENTATION == east_low && doors_status.east == open) -> lock_water_level == low_level)}
-//ltl c2a { []((LOCK_ORIENTATION == west_low && doors_status.east == open) -> lock_water_level == high_level)}
-//ltl c2b { []((LOCK_ORIENTATION == east_low && doors_status.west == open) -> lock_water_level == high_level)}
-//ltl d1 { []((request_west && ship_status[0] == go_west_to_east) -> <> (ship_status[0] == go_west_to_east_in_lock)) }
-//ltl d1 { []((request_east && ship_status[0] == go_east_to_west) -> <> (ship_status[0] == go_east_to_west_in_lock)) }
-//ltl p1 { []<> (ship_status[0] == go_west_to_east_in_lock) }
-//ltl c1a { []((LOCK_ORIENTATION == west_low && doors_status.west == open) -> lock_water_level == low_level)}
-//ltl c1b { []((LOCK_ORIENTATION == east_low && doors_status.east == open) -> lock_water_level == low_level)}
-//ltl c2a { []((LOCK_ORIENTATION == west_low && doors_status.east == open) -> lock_water_level == high_level)}
-//ltl c2b { []((LOCK_ORIENTATION == east_low && doors_status.west == open) -> lock_water_level == high_level)}
-//ltl d1a { []((request_west && ship_status[0] == go_west_to_east) -> <> (ship_status[0] == go_west_to_east_in_lock)) }
-//ltl d1b { []((request_east && ship_status[0] == go_east_to_west) -> <> (ship_status[0] == go_east_to_west_in_lock)) }
+// Change the 0, 1, 2 etc. for different numbers to test for different locks/ships
+ltl p1 { []<> (ship_status[0] == go_west_to_east_in_lock) }
+ltl c1a { []((LOCK_ORIENTATION[2] == west_low && doors_status[2].west == open) -> (lock_water_level[2] == low_level))}
+ltl c1b { []((LOCK_ORIENTATION[2] == east_low && doors_status[2].east == open) -> (lock_water_level[2] == low_level))}
+ltl c2a { []((LOCK_ORIENTATION[2] == west_low && doors_status[2].east == open) -> (lock_water_level[2] == high_level))}
+ltl c2b { []((LOCK_ORIENTATION[2] == east_low && doors_status[2].west == open) -> (lock_water_level[2] == high_level))}
+ltl d1a { []((request_west?[true] && ship_status[0] == go_west_to_east) -> <> (ship_status[0] == go_west_to_east_in_lock)) }
+ltl d1b { []((request_east?[true] && ship_status[0] == go_east_to_west) -> <> (ship_status[0] == go_east_to_west_in_lock)) }
+
+// Change the 0, 1, 2 etc. for different numbers to test for different locks
+ltl e1 { []((request_west?[true, 0]) -> <> (doors_status[0].west == open)) }
+ltl e2 { []((request_east?[true, 0]) -> <> (doors_status[0].east == open)) }
+ltl f1 { []<> (request_west?[true, 0]) }
+ltl f2 { []<> (request_east?[true, NMINUS1]) }
+
 
 // Type for direction of ship.
 mtype:direction = { go_west_to_east, go_west_to_east_in_lock, go_east_to_west, go_east_to_west_in_lock, goal_reached };
@@ -365,7 +363,10 @@ init {
 		proc = 0;
 		do
 		:: proc < N ->
-			LOCK_ORIENTATION[proc] = east_low;//need to adapt further
+			if
+            :: proc % 2 == 0 -> LOCK_ORIENTATION[proc] = east_low;
+			:: proc % 2 == 1 -> LOCK_ORIENTATION[proc] = west_low;										
+			fi;
 			doors_status[proc].west = closed;
 			doors_status[proc].east = closed;
 			valve_status[proc].lower = closed;
